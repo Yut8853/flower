@@ -80,7 +80,8 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: 'images/[name].[ext]'
+              name: '[path][name].[ext]', // 出力パスとファイル名
+              context: 'src' // ベースディレクトリの設定
             }
           }
         ]
