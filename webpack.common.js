@@ -17,7 +17,7 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: "src/assets", to: "dist/assets" },
+        { from: "src/assets", to: "assets" },
       ],
     }),
   ],
@@ -80,7 +80,7 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: '[path][name].[ext]', // 出力パスとファイル名
+              name: 'assets/images/[name].[ext]', // 出力パスとファイル名
               context: 'src' // ベースディレクトリの設定
             }
           }

@@ -8,7 +8,8 @@ module.exports = merge(common, {
   devtool: 'source-map', // 本番環境向けのソースマップ設定
   // その他の本番環境特有の設定
   output: {
-    path: path.resolve(__dirname, './dist'), 
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist'), 
   },
   plugins: [
     new CleanWebpackPlugin(),
