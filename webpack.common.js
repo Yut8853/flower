@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const ImageminWebpWebpackPlugin = require("imagemin-webp-webpack-plugin");
 const isProduction = process.env.NODE_ENV === 'production';
@@ -11,10 +12,14 @@ module.exports = {
     app: './src/index.js',
   },
   plugins: [
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css'
+    }),
     new HtmlWebpackPlugin({
       title: 'Production',
       template: './src/index.html',
+      inject: true,
     }),
     new CopyPlugin({
       patterns: [
@@ -44,31 +49,10 @@ module.exports = {
       {
         test: /\.(css|sass|scss)/, // 対象となるファイルの拡張子
         use: [
-          {
-            loader: MiniCssExtractPlugin.loader
-          },
-          // CSSをバンドルするための機能
-          {
-            loader: "css-loader",
-            options: {
-              // オプションでCSS内のurl()メソッドの取り込みを禁止する
-              url: false,
-              // ソースマップの利用有無
-              sourceMap: enabledSourceMap,
-
-              // 0 => no loaders (default);
-              // 1 => postcss-loader;
-              // 2 => postcss-loader, sass-loader
-              importLoaders: 2
-            }
-          },
-          {
-            loader: "sass-loader",
-            options: {
-              // ソースマップの利用有無
-              sourceMap: enabledSourceMap
-            },
-          },
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          "postcss-loader",
+          "sass-loader",
         ],
       },
       {
@@ -87,7 +71,7 @@ module.exports = {
       },
       // 画像ファイルの処理
       {
-        test: /\.(png|jpg|jpeg|gif)$/i,
+        test: /\.(png|jpg|jpeg|gif|svg|webp)$/i,
         use: [
           'file-loader',
           {
@@ -113,12 +97,29 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.{glsl|frag|vert}$/,
+        loader: 'raw-loader',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.{glsl|frag|vert}$/,
+        loader: 'glslify-loader',
+        exclude: /node_modules/
+      },
       // フォントファイルの処理
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
 
       },
+    ],
+  },
+  optimization: {
+    minimizer: [
+      new CssMinimizerPlugin({
+        test: /\.css$/i,
+      }),
     ],
   },
   // ES5(IE11等)向けの指定（webpack 5以上で必要）
