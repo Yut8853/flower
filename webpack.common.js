@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
+const ImageminWebpWebpackPlugin = require("imagemin-webp-webpack-plugin");
 const isProduction = process.env.NODE_ENV === 'production';
 const enabledSourceMap = !isProduction;
 
@@ -17,8 +18,19 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: "src/assets", to: "assets" },
+        {
+          from: "src/assets",
+          to: "assets",
+        },
       ],
+    }),
+    new ImageminWebpWebpackPlugin({
+      config: [{
+        test: /\.(png|jpe?g)$/i, // 対象ファイル
+        options: {
+          quality: 75 // 画質
+        }
+      }]
     }),
   ],
   output: {
@@ -75,18 +87,32 @@ module.exports = {
       },
       // 画像ファイルの処理
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        test: /\.(png|jpg|jpeg|gif)$/i,
         use: [
+          'file-loader',
           {
-            loader: 'file-loader',
+            loader: 'image-webpack-loader',
             options: {
-              name: 'assets/images/[name].[ext]', // 出力パスとファイル名
-              context: 'src' // ベースディレクトリの設定
-            }
-          }
-        ]
+              // JPEGやPNGの最適化設定
+              mozjpeg: {
+                progressive: true,
+                quality: 65,
+              },
+              optipng: {
+                enabled: true,
+              },
+              pngquant: {
+                quality: [0.65, 0.90],
+                speed: 4,
+              },
+              // WebP形式への変換オプション
+              webp: {
+                quality: 75,
+              },
+            },
+          },
+        ],
       },
-
       // フォントファイルの処理
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
